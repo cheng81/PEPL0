@@ -1,0 +1,36 @@
+namespace org.pepl.sample.firstorder
+
+process Main {
+	process CallFoo(anotherProc) {
+		call<arg> {
+			debug('CallFoo.foo called ',arg)
+			response auto anotherProc.foo<arg>
+			exclude super
+		}
+	}
+
+	makeCallA {
+		let theA := new A
+		new $Main.CallFoo(theA)
+	}
+	makeCallB<barg> {
+		let theB := new B(barg)
+		new CallFoo(theB)
+	}
+
+	callFoo<arg> {
+		response auto CallFoo(*).call<arg>
+	}
+
+}
+
+process A {
+	foo<arg> {
+		debug('Process A.foo<',arg,'> executed')
+	}
+}
+process B(some) {
+	foo<arg> {
+		debug('Process B(',some,').foo<',arg,'> executed')
+	}
+}

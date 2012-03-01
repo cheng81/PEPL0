@@ -1,0 +1,33 @@
+namespace org.pepl.sample.treatmentb
+
+process Main {
+	prescribe<patientId,medicine,qty> {
+		new Administer(patientId,medicine,qty)
+	}
+	patientLeft<patientId> {
+		response auto Administer(patientId,*,*).remove
+	}
+
+	process Administer(patientId,medicine,qty) {
+		must sign {
+			exclude remove
+			include give
+		}
+		must give {
+			when (& Condition(sign) (! Must(sign))) {
+				debug('Done Administration of ',qty,' units of ',medicine,' to patient ',patientId)
+				exclude super
+			}
+		}
+		distrust<reason> {
+			debug('Distrust ',medicine,' for patient ',patientId,', because ',reason)
+			include remove
+			exclude give
+			response sign
+		}
+		remove {
+			debug('Removing Administration of ',qty,' units of ',medicine,' to patient ',patientId)
+			exclude super
+		}
+	}
+}

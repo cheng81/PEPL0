@@ -1,0 +1,46 @@
+namespace org.pepl.sample.test0
+
+process p1(foo) {
+	e1 { response auto e2 }
+	e2 { exclude super }
+}
+process p2 {
+	e1<foo> { new p1(foo) }
+}
+
+foo<n> {
+	when (! Executed(bar<n> within 0,10) as theBar) throw barDetected<theBar.n> {
+		...
+	}
+}
+
+process My {
+	A<x> when (> x 5) {
+		response B<2> within 10
+	}
+}
+
+
+process Main {
+	a<n> { response auto A(*).a<this> }
+	b<n> { response auto B(*).b<this> }
+
+}
+
+process A(receiver) {
+	a<ev> { response auto receiver.newa<ev> }
+}
+process B(received) {
+	b<n> { response auto receiver.newb<n> }
+}
+
+process SeqAB(receiver) {
+	newa<ev>
+	newb<ev>
+
+	merge<a,b> {
+		when (& (& Executed(newa<a>) as theA Executed(newb<b>) as theB) (< theA.a.start theB.b.start)) {
+			response auto receiver.merged<theA,theB>
+		}
+	}
+}

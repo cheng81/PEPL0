@@ -1,0 +1,92 @@
+namespace org.pepl.sample.fibsum
+
+process Main {
+	fib<n> {
+		when Executed(result<n,*>) as res {
+			response auto result<n,res.result>
+		} else {
+			new Final(n)
+			new Fib(n)
+		}
+	}
+
+	result<n,result>
+	{
+		response auto Final(n).result<result>
+	}
+
+	process Final(n) {
+		must result<result> {
+			debug(n,'th fibonacci number is',result)
+			response auto Barrier(*,*,*).step<result>
+			exclude super
+		}
+	}
+
+	process Fib(n) {
+		step {
+			when (& Executed(result<(- n 1),*>) as r1 Executed(result<(- n 2),*>) as r2 ){
+				response auto result<n,(+ r1.result r2.result)>
+				response auto Fib((+ n 1)).step
+				exclude super
+			}
+			when (! Running(Fib((- n 1)))) {
+				new Fib((- n 1))
+				response auto Fib((- n 1)).step
+			} else { response auto Fib((- n 1)).step }
+		}
+	}
+
+	enqueue<n> {
+		when Running(Barrier(*,*,*)) as barrier {
+			response auto barrier.add
+			response auto Starter(*).newfib<n>
+			response auto fib<n>
+		} else {
+			let theFinal := new SumFinal
+			new Barrier(0,0,theFinal)
+			new Starter(n)
+			response auto fib<n>
+		}
+	}
+	start {
+		response auto Starter(*).start
+	}
+
+	process Starter(n) {
+		newfib<n1> {
+			when (< n n1) {
+				new Starter(n1)
+				exclude super
+			}
+		}
+		start {
+			response auto Fib(n).step
+			exclude super
+		}
+	}
+
+	process SumFinal {
+		finish<sum> {
+			debug('Sum of all fibs is ',sum)
+			exclude super
+		}
+	}
+
+	process Barrier(wait,accum,callme) {
+		step<result> {
+			when (= wait 0) {
+				response auto callme.finish<(+ result accum)>
+				exclude super
+			} else {
+				debug('Still ',wait,' process to wait for')
+				new Barrier((- wait 1),(+ result accum),callme)
+				exclude super
+			}
+		}
+		add {
+			new Barrier((+ wait 1),0,callme)
+			exclude super
+		}
+	}
+}

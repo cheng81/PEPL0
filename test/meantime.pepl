@@ -1,0 +1,47 @@
+namespace org.pepl.sample.meantime
+
+process Main {
+	create<room> {
+		new Update(room,0,0)
+	}
+	kill<room> {
+		response auto Update(room,*,*).kill
+	}
+	reset<room> {
+		response auto Update(room,*,*).reset
+	}
+
+	enter<room,user,time> {
+		new Exit(room,user,time)
+	}
+	exit<room,user,time> {
+		response auto Exit(room,user,*).exit<time>
+	}
+
+	mean<room,update> {
+		debug('Mean time in room ',room,' is ',update)
+	}
+
+	process Exit(room,user,enter_time) {
+		must exit<time> {
+			response auto Update(room,*,*).update<(- time enter_time)>
+			exclude super
+		}
+	}
+
+	process Update(room,sum,count) {
+		update<newupd> {
+			let newsum := (+ sum newupd)
+			let newcnt := (+ count 1)
+			debug('New sum ',newsum,' and count ',newcnt)
+			new Update(room,newsum,newcnt)
+			response auto mean<room,(/ newsum newcnt)>
+			exclude super
+		}
+		kill { exclude super }
+		reset {
+			new Update(room,0,0)
+			exclude super
+		}
+	}
+}

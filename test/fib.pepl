@@ -1,0 +1,30 @@
+namespace org.pepl.sample.fib
+
+process Main {
+	fib<n> {
+		when Executed(result<n,*>) as res {
+			response auto result<n,res.result>
+		} else {
+			new Fib(n)
+			response auto Fib(n).step
+		}
+	}
+
+	result<n,result>
+	{
+		debug(n,'th fibonacci number is ',result)
+	}
+
+	process Fib(n) {
+		step {
+			when (& Executed(result<(- n 1),*>) as r1 Executed(result<(- n 2),*>) as r2 ){
+				response auto result<n,(+ r1.result r2.result)>
+				response auto Fib((+ n 1)).step
+				exclude super
+			} else {
+				new Fib((- n 1))
+				response auto Fib((- n 1)).step
+			}
+		}
+	}
+}

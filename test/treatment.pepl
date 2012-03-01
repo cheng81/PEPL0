@@ -1,0 +1,29 @@
+namespace org.pepl.sample.treatment
+
+process Main {
+	prescribe<patientId,medicine,qty> {
+		new Administer(patientId,medicine,qty)
+	}
+
+	process Administer(patientId,medicine,qty) {
+		must sign {
+			exclude remove
+			include give
+		}
+		must give {
+			when (& Condition(sign) (! Must(sign))) {
+				debug('Done Administration of ',qty,' units of ',medicine,' to patient ',patientId)
+				exclude super
+			}
+		}
+		distrust {
+			include remove
+			exclude give
+			response sign
+		}
+		remove {
+			debug('Removing Administration of ',qty,' units of ',medicine,' to patient ',patientId)
+			exclude super
+		}
+	}
+}
