@@ -1,0 +1,52 @@
+namespace org.pepl.sample.arrangemeeting
+
+process Main {
+	create<Case> {
+		new Manage(Case,0,0)
+	}
+
+	process Manage(Case,DLo,DDa) {
+		update<NewCase> {
+			exclude super
+			new Manage(NewCase,DLo,DDa)
+		}
+		holdMeeting {
+			when (& Condition(acceptLo) Condition(acceptDa))
+			{
+				debug('Meeting',Case,'held.')
+				exclude super
+			}
+		}
+		proposeLo<NewDLo> {
+			exclude super
+			new Manage(Case,NewDLo,DDa)
+			exclude Manage(Case,NewDLo,DDa).proposeLo
+			exclude Manage(Case,NewDLo,DDa).acceptLo
+			include Manage(Case,NewDLo,DDa).proposeDa
+			include Manage(Case,NewDLo,DDa).acceptDa
+			response Manage(Case,NewDLo,DDa).acceptDa
+			response Manage(Case,NewDLo,DDa).holdMeeting
+		}
+		proposeDa<NewDDa> {
+			when Condition(proposeLo<*>) {
+				exclude super
+				new Manage(Case,DLo,NewDDa)
+				exclude Manage(Case,DLo,NewDDa).proposeDa
+				exclude Manage(Case,DLo,NewDDa).acceptDa
+				include Manage(Case,DLo,NewDDa).proposeLo
+				include Manage(Case,DLo,NewDDa).acceptLo
+				response Manage(Case,DLo,NewDDa).acceptLo
+			}
+		}
+		acceptLo {
+			when Condition(proposeDa<*>) {
+				debug('LO accepted date',DDa)
+			}
+		}
+		acceptDa {
+			when Condition(proposeLo<*>) {
+				debug('DA accepted date',DLo)
+			}
+		}
+	}
+}
