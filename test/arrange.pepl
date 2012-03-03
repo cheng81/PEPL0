@@ -2,51 +2,51 @@ namespace org.pepl.sample.arrangemeeting
 
 process Main {
 	create<Case> {
-		new Manage(Case,0,0)
+		new Arrange(Case)
+		new Arrange(Case).Proposal(0)
 	}
 
-	process Manage(Case,DLo,DDa) {
-		update<NewCase> {
-			exclude super
-			new Manage(NewCase,DLo,DDa)
+	process Arrange(Case) {
+
+		must proposeLo<date> {
+			response auto Proposal(*).update<date>
+			include acceptDa
+			response acceptDa
 		}
-		holdMeeting {
-			when (& Condition(acceptLo) Condition(acceptDa))
-			{
-				debug('Meeting',Case,'held.')
-				exclude super
-			}
-		}
-		proposeLo<NewDLo> {
-			exclude super
-			new Manage(Case,NewDLo,DDa)
-			exclude Manage(Case,NewDLo,DDa).proposeLo
-			exclude Manage(Case,NewDLo,DDa).acceptLo
-			include Manage(Case,NewDLo,DDa).proposeDa
-			include Manage(Case,NewDLo,DDa).acceptDa
-			response Manage(Case,NewDLo,DDa).acceptDa
-			response Manage(Case,NewDLo,DDa).holdMeeting
-		}
-		proposeDa<NewDDa> {
+		proposeDa<date> {
 			when Condition(proposeLo<*>) {
+				response auto Proposal(*).update<date>
+				include acceptLo
+				response acceptLo
+			}
+		}
+
+		excluded acceptLo {
+			let p := Proposal(*)
+			debug('Lo accepted, at date',p.state.store.Date)
+			exclude acceptLo
+			exclude acceptDa
+		}
+		excluded acceptDa {
+			let p := Proposal(*)
+			debug('Da accepted, at date',p.state.store.Date)
+			exclude acceptDa
+			exclude acceptLo
+		}
+
+		process Proposal(Date) {
+			update<newDate> {
 				exclude super
-				new Manage(Case,DLo,NewDDa)
-				exclude Manage(Case,DLo,NewDDa).proposeDa
-				exclude Manage(Case,DLo,NewDDa).acceptDa
-				include Manage(Case,DLo,NewDDa).proposeLo
-				include Manage(Case,DLo,NewDDa).acceptLo
-				response Manage(Case,DLo,NewDDa).acceptLo
-			}
-		}
-		acceptLo {
-			when Condition(proposeDa<*>) {
-				debug('LO accepted date',DDa)
-			}
-		}
-		acceptDa {
-			when Condition(proposeLo<*>) {
-				debug('DA accepted date',DLo)
+				new Proposal(newDate)
 			}
 		}
 	}
+	holdMeeting<Case> {
+		when Accepting(Arrange(Case)) {
+			let c := Arrange(Case)
+			let p := c:Proposal(*)
+			debug('Meeting',Case,'held at date',p.state.store.Date)
+		}
+	}
+
 }
