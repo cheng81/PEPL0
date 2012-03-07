@@ -3,48 +3,52 @@ namespace org.pepl.sample.arrangemeeting
 process Main {
 	create<Case> {
 		new Arrange(Case)
-		new Arrange(Case).Proposal(0)
+		new Arrange(Case).Proposal('LO',0)
+		new Arrange(Case).Proposal('DA',0)
 	}
 
 	process Arrange(Case) {
 
 		must proposeLo<date> {
-			response auto Proposal(*).update<date>
+			response auto Proposal('LO',*).update<date>
 			include acceptDa
 			response acceptDa
 		}
 		proposeDa<date> {
 			when Condition(proposeLo<*>) {
-				response auto Proposal(*).update<date>
+				response auto Proposal('DA',*).update<date>
 				include acceptLo
 				response acceptLo
 			}
 		}
 
 		excluded acceptLo {
-			let p := Proposal(*)
-			debug('Lo accepted, at date',p.state.store.Date)
+			response auto Proposal('LO',*).rejected
+			debug('LO accepted')
 			exclude acceptLo
 			exclude acceptDa
 		}
 		excluded acceptDa {
-			let p := Proposal(*)
-			debug('Da accepted, at date',p.state.store.Date)
+			response auto Proposal('DA',*).rejected
+			debug('DA accepted')
 			exclude acceptDa
 			exclude acceptLo
 		}
 
-		process Proposal(Date) {
+		process Proposal(Who,Date) {
 			update<newDate> {
 				exclude super
-				new Proposal(newDate)
+				new Proposal(Who,newDate)
+			}
+			rejected {
+				exclude super
 			}
 		}
 	}
 	holdMeeting<Case> {
 		when Accepting(Arrange(Case)) {
 			let c := Arrange(Case)
-			let p := c:Proposal(*)
+			let p := c:Proposal(*,*)
 			debug('Meeting',Case,'held at date',p.state.store.Date)
 		}
 	}
