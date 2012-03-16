@@ -35,6 +35,8 @@ process Main {
 			exclude acceptLo
 		}
 
+		done { exclude super }
+
 		process Proposal(Who,Date) {
 			update<newDate> {
 				exclude super
@@ -50,6 +52,7 @@ process Main {
 			let c := Arrange(Case)
 			let p := c:Proposal(*,*)
 			debug('Meeting',Case,'held at date',p.state.store.Date)
+			response auto c.done
 		}
 	}
 
