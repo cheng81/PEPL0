@@ -1,0 +1,41 @@
+namespace org.pepl.test.countdown
+
+process Main {
+	start<togo> {
+		new CountDown(togo)
+		response auto CountDown(*).step
+	}
+	stop {
+		response auto CountDown(*).stop
+	}
+	pause {
+		response auto CountDown(*).pause
+	}
+	resume {
+		response auto CountDown(*).resume
+	}
+
+	process CountDown(cur) {
+		step {
+			when (= cur 0) {
+				debug('Countdown finished')
+			} else {
+				debug(cur)
+				exclude super
+				let c := new CountDown((- cur 1))
+				response auto c.step
+			}
+		}
+		pause {
+			exclude step
+		}
+		resume {
+			include step
+			response auto step
+		}
+		stop {
+			//exclude step
+			exclude super
+		}
+	}
+}
