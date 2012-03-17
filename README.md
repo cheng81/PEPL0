@@ -1,6 +1,6 @@
 # PEPL - a Process Oriented Event-Based Language
 
-Javascript prototype, currently requires [nodejs](www.nodejs.org)
+Javascript prototype, currently requires [nodejs](http://www.nodejs.org)
 
 ## Instructions
 
