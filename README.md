@@ -23,8 +23,7 @@ Console commands:
 
 Other than that, you can bind variables:
 
-  let name := expression
-
+    let <name> := <expression>
 where `name` is an identifier and `expression` is:
 
   - a literal value (`'foo'`, `4`, `true`)
