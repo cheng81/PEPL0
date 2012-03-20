@@ -18,9 +18,9 @@ process Main {
 	process CountDown(cur) {
 		step {
 			when (= cur 0) {
-				debug('Countdown finished')
+				log('Countdown finished')
 			} else {
-				debug(cur)
+				log(cur)
 				exclude super
 				let c := new CountDown((- cur 1))
 				response auto c.step
@@ -34,7 +34,6 @@ process Main {
 			response auto step
 		}
 		stop {
-			//exclude step
 			exclude super
 		}
 	}
