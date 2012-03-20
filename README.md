@@ -1,6 +1,6 @@
 # PEPL - a Process Oriented Event-Based Language
 
-Javascript prototype, currently requires [nodejs](www.nodejs.org)
+Javascript prototype, currently requires [nodejs](http://www.nodejs.org)
 
 ## Instructions
 
@@ -23,9 +23,8 @@ Console commands:
 
 Other than that, you can bind variables:
 
-  let <name> := <expression>
-
-where `name` is an identifier and expression is:
+    let <name> := <expression>
+where `name` is an identifier and `expression` is:
 
   - a literal value (`'foo'`, `4`, `true`)
   - another variable name
