@@ -48,7 +48,7 @@ process Main {
 		}
 	}
 	holdMeeting<Case> {
-		when Accepting(Arrange(Case)) {
+		when Milestone(Arrange(Case)) {
 			let c := Arrange(Case)
 			let p := c:Proposal(*,*)
 			debug('Meeting',Case,'held at date',p.state.store.Date)

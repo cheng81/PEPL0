@@ -14,7 +14,7 @@ process Main {
 			include give
 		}
 		must give {
-			when (& Condition(sign) (! Must(sign))) {
+			when Condition(sign), Milestone(sign) {
 				debug('Done Administration of ',qty,' units of ',medicine,' to patient ',patientId)
 				exclude super
 			}

@@ -2,8 +2,8 @@ namespace org.pepl.sample.fib
 
 process Main {
 	fib<n> {
-		when Executed(result<n,*>) as res {
-			response auto result<n,res.result>
+		when Condition(result<n,?res>) {
+			response auto result<n,?res>
 		} else {
 			new Fib(n)
 			response auto Fib(n).step
@@ -17,8 +17,8 @@ process Main {
 
 	process Fib(n) {
 		step {
-			when (& Executed(result<(- n 1),*>) as r1 Executed(result<(- n 2),*>) as r2 ){
-				response auto result<n,(+ r1.result r2.result)>
+			when Condition(result<(- n 1),?r1>), Condition(result<(- n 2),?r2>) {
+				response auto result<n,(+ ?r1 ?r2)>
 				response auto Fib((+ n 1)).step
 				exclude super
 			} else {

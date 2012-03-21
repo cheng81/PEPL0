@@ -1,0 +1,25 @@
+namespace org.pepl.sample.unif2
+
+process Main {
+	process Foo(a) {
+		must doit {
+			log('doit done',a)
+		}
+		again { response doit }
+		close {
+			exclude super
+		}
+	}
+
+	makefoo<a> {
+		new Foo(a)
+	}
+
+	a<data>
+
+	b<foo,data> {
+		when Condition(a<data>), Milestone(Foo(?f)), (> foo ?f) {
+			log('Done b',foo,data)
+		}
+	}
+}
