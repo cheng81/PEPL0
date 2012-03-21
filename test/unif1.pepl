@@ -1,0 +1,33 @@
+namespace org.pepl.sample.unif1
+
+process Main {
+	foo<a,b> {
+		log('foo',a,b)
+	}
+	bar<c> {
+		when forall Condition(foo<*,?a>), Condition(foo<?a,?b>), (> c ?b) {
+			log('Foo1.b',?a)
+			log('Foo2.b',?b)
+			log('Bar.c',c)
+		}
+	}
+	baz<c> {
+		when Condition(foo<*,?f1>), Condition(foo<?f1,?f2>), (> c ?f2) {
+			log('Foo1.b',?f1)
+			log('Foo2.b',?f2)
+			log('Baz.c',c)
+		}
+	}
+	qoox<c> {
+		when Condition(foo<*,?f1>), Condition(foo<?f1,c>) {
+			log('foo<*,?f1>,foo<?f1,c>,qoox<c>',?f1,c)
+		}
+	}
+	qoox2<a,b> {
+		when (> a b) {
+			log('a>b',a,b)
+		} else {
+			log('a<=b',a,b)
+		}
+	}
+}

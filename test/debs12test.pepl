@@ -1,0 +1,25 @@
+namespace org.pepl.sample.debs12test
+
+process Main {
+	excluded a<data>
+	b<data>
+
+	c<data> {
+		when Condition(a<?a1>),
+			 Condition(b<?b1>),
+			 (& (< data ?a1) (> data ?b1)) {
+			 response auto d<?a1>
+			 response auto e<data>
+		}
+	}
+
+	d<data> {
+		log('d executed')
+	}
+	e<data> {
+		log('e executed')
+	}
+	f {
+		include a
+	}
+}
